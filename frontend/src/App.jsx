@@ -2,33 +2,38 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import Myheader from './Myheader'
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [title, setTitle] = useState("Select a Report")
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+<div className= 'scaffold'>
+            <div className='sidebar'>
+                <button className='button' onClick={()=> setTitle("Reporte 1")}>
+                    Reporte 1
+                </button>
+                <button className='button' onClick={()=> setTitle("Reporte 2")}>
+                    Reporte 2
+                </button>
+                <button className='button' onClick={()=> setTitle("Reporte 3")}>
+                    Reporte 3
+                </button>
+                <button className='button' onClick={()=> setTitle("Reporte 4")}>
+                    Reporte 4
+                </button>
+            </div>
+            <div className='report-area'>
+                <h1>{title}</h1>
+                <div className='report-scaffold'>
+                <div style={{ color: 'black' }}>opciones</div>
+                <div style={{ color: 'black' }}>query results</div>
+
+                </div>
+                
+            </div>
+</div>
   )
 }
 
