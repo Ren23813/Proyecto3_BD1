@@ -33,6 +33,7 @@ func main() {
 	})
 
 	router.Route("/api/series", func(r chi.Router) {
+		//r.Get("/swagger/*", httpSwagger.WrapHandler)
 	})
 
 	fmt.Println("Server running on http://localhost:8080")
