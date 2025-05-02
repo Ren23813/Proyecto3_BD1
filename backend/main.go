@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"proyecto3/backend/db"
+	"proyecto3/backend/handlers"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -33,11 +34,11 @@ func main() {
 	})
 
 	router.Route("/db", func(r chi.Router) {
-		r.Post("/avgNotasS", handlers.avgNotasSeccion)
-		r.Post("/avgEstudiantesC", handlers.avgEstudianteCurso)
-		r.Post("/repHorasB", handlers.repHorasbeca)
-		r.Post("/latestAct", handlers.latestActivities)
-		r.Post("/avgSeccionP", handlers.avgSeccionProfesor)
+		r.Post("/avgNotasS", handlers.AvgNotasSeccion)
+		r.Post("/avgEstudiantesC", handlers.AvgEstudianteCurso)
+		r.Post("/repHorasB", handlers.RepHorasbeca)
+		r.Post("/latestAct", handlers.LatestActivities)
+		r.Post("/avgSeccionP", handlers.AvgSeccionProfesor)
 	})
 
 	fmt.Println("Server running on http://localhost:8080")

@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"proyecto3/backend/db"
-	"proyecto3/backend/models/models"
+	"proyecto3/backend/models"
 
 	_ "github.com/lib/pq"
 )
 
-func avgNotasSeccion(w http.ResponseWriter, r *http.Request) {
+func AvgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 	var newStruct models.Struct1
 	if err := json.NewDecoder(r.Body).Decode(&newStruct); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -62,7 +62,7 @@ func avgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resultados)
 }
 
-func avgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
+func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
 	var newStruct models.Struct2
 	if err := json.NewDecoder(r.Body).Decode(&newStruct); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -116,7 +116,7 @@ func avgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resultados)
 }
 
-func repHorasbeca(w http.ResponseWriter, r *http.Request) {
+func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 	var newStruct models.Struct3
 	if err := json.NewDecoder(r.Body).Decode(&newStruct); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -147,11 +147,11 @@ func repHorasbeca(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var resultados []models.ResultadoActividadesValidas
+	var resultados []models.ResultadoHorasBeca
 
 	for rows.Next() {
-		var r models.ResultadoActividadesValidas
-		if err := rows.Scan(&r.Curso, &r.Seccion, &r.CantidadAlumnos, &r.PromedioNotas); err != nil {
+		var r models.ResultadoHorasBeca
+		if err := rows.Scan(&r.Estudiante, &r.TotalHoras, &r.CantidadMovimientos); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -168,7 +168,7 @@ func repHorasbeca(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resultados)
 }
 
-func latestActivities(w http.ResponseWriter, r *http.Request) {
+func LatestActivities(w http.ResponseWriter, r *http.Request) {
 	var newStruct models.Struct4
 	if err := json.NewDecoder(r.Body).Decode(&newStruct); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -204,11 +204,11 @@ func latestActivities(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var resultados []models.ResultadoActividadesProfesor
+	var resultados []models.ResultadoActividadReciente
 
 	for rows.Next() {
-		var r models.ResultadoActividadesProfesor
-		if err := rows.Scan(&r.Curso, &r.Seccion, &r.CantidadAlumnos, &r.PromedioNotas); err != nil {
+		var r models.ResultadoActividadReciente
+		if err := rows.Scan(&r.Estudiante, &r.Actividad, &r.Descripcion, &r.ValorNeto, &r.FechaEntrega, &r.Seccion, &r.Curso); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -225,7 +225,7 @@ func latestActivities(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resultados)
 }
 
-func avgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
+func AvgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
 	var newStruct models.Struct5
 	if err := json.NewDecoder(r.Body).Decode(&newStruct); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -264,7 +264,7 @@ func avgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var r models.ResultadoPromedioSeccionProfesor
-		if err := rows.Scan(&r.Curso, &r.Seccion, &r.CantidadAlumnos, &r.PromedioNotas); err != nil {
+		if err := rows.Scan(&r.ProfesorNombre, &r.Curso, &r.Seccion, &r.PromedioNotas, &r.CantidadEstudiantes); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
