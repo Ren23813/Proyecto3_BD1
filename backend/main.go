@@ -32,8 +32,12 @@ func main() {
 		})
 	})
 
-	router.Route("/api/series", func(r chi.Router) {
-		//r.Get("/swagger/*", httpSwagger.WrapHandler)
+	router.Route("/db", func(r chi.Router) {
+		r.Post("/avgNotasS", handlers.avgNotasSeccion)
+		r.Post("/avgEstudiantesC", handlers.avgEstudianteCurso)
+		r.Post("/repHorasB", handlers.repHorasbeca)
+		r.Post("/latestAct", handlers.latestActivities)
+		r.Post("/avgSeccionP", handlers.avgSeccionProfesor)
 	})
 
 	fmt.Println("Server running on http://localhost:8080")
