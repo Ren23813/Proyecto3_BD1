@@ -1,18 +1,18 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:15
-    container_name: postgres_db
+    image: postgres:16
+    container_name: postgres_db_proyecto3
     restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: proyecto3
+      POSTGRES_DB: Proyecto3
     ports:
       - "5430:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./01-ddl.sql:/docker-entrypoint-initdb.d/01-ddl.sql  
+      - ./02-data.sql:/docker-entrypoint-initdb.d/02-data.sql
 
 volumes:
   pgdata:
