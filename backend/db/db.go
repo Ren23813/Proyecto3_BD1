@@ -15,9 +15,9 @@ func Init() {
 
 	host := "localhost"
 	port := 5430
-	user := "admin"
-	password := "admin123"
-	dbname := "proyecto3"
+	user := "lector_proyecto3"
+	password := "mucha_chamba"
+	dbname := "Proyecto3"
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
