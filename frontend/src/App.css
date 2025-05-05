@@ -31,23 +31,32 @@
 }
 
 .read-the-docs {
-  color: #888;
+  color: #705f5f;
 }
 .button {
   margin: 10px;
   padding: 10px;
-  background-color: #333;
+  background-color: #567794;
   color: white;
   border: none;
   border-radius: 5px;
   width: 150px;
 }
 
-.sidebar {
+.button2 {
+  margin: 10px;
+  padding: 5px;
+  background-color: white;
+  color: #538abd;
+  border: none;
+  border-radius: 5px;
+  width: 200px;
+}
+
+.topbar{
   display: flex;
-  flex-direction: column;
-  background-color: Black;
-  justify-content: stretch;
+  justify-content: right;
+  align-items: center;
 }
 
 .scaffold {
@@ -58,15 +67,30 @@
   width: 100vw;
   margin: 0;
   padding: 0;
+  
 }
 
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: #042140;
+  justify-content:flex-start;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  line-height: 90px;
+  text-align: center;
+  color: #042140;
+}
 
 .report-area {
   display: grid;
-  grid-template-rows: 60px 1fr;
+  grid-template-rows: 90px 1fr;
   grid-template-columns: 1fr;          
-  width: 100vh; 
-  background-color: gray;
+  width: 100%; 
+  background-color: #b1c5d8;
 }
 
 .report-scaffold {
@@ -75,4 +99,19 @@
   grid-template-rows: 1fr;          
   height: 100vh; 
   background-color: black;
+}
+
+.filters {
+  background-color: #f5f3ef;
+  color: black;
+}
+
+
+.results{
+  background-color: #245580;
+}
+
+.topbar{
+  background-color: #538abd;
+  height: 50px;
 }

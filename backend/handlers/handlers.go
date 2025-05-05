@@ -60,6 +60,7 @@ func AvgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 	// Devolver como JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resultados)
+	
 }
 
 func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
