@@ -26,6 +26,28 @@ function App() {
   const { toPDF, targetRef } = usePDF({ filename: 'pagina.pdf' });
 
 
+  //función para la exportación de datos json a csv
+  const exportToCSV = (data, filename = 'reporte.csv') => {
+    if (!data || !data.length) return;
+  
+    const replacer = (key, value) => value === null ? '' : value; 
+    const header = Object.keys(data[0]);
+    const csv = [
+      header.join(','),
+      ...data.map(row => header.map(field => JSON.stringify(row[field], replacer)).join(','))
+    ].join('\r\n');
+  
+    // Descargar el archivo
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   //HandlerReportes: función para llamar lod datos
   const handleReporte = async (titulo, endpoint, datos) =>{
     setTitle(titulo)
@@ -267,7 +289,7 @@ function App() {
                         <div className='topbar'>
                         <button className='button2' onClick={"a"}>Generar Gráficas</button>
                         <button className='button2'  onClick={() => {setTimeout(() => {toPDF();}, 100); }}>Exportar como PDF</button> 
-                        <button className='button2' onClick={"a"}>Exportar como CSV </button>
+                        <button className='button2' onClick={()=>exportToCSV(resultados)}>Exportar como CSV </button>
                       </div>
                         <div ref={targetRef}   style={{backgroundColor: 'white',padding: '20px',color: 'black',}}>
                             <ReportTable data={resultados} />                          
