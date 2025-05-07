@@ -32,7 +32,8 @@ func AvgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 			actividades_estudiantes ae
 		JOIN actividades a ON ae.id_actividad = a.id
 		JOIN secciones s ON a.id_seccion = s.id
-		JOIN cursos c ON s.id_curso = c.id;
+		JOIN cursos c ON s.id_curso = c.id
+		GROUP BY c.nombre, s.seccion;
 		`
 		rows, err = db.DB.Query(query)
 	} else {
@@ -97,16 +98,17 @@ func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
 	if newStruct.IsEmpty() {
 		query := `
 			SELECT 
-				c.nombre AS curso,
-				s.seccion,
-				COUNT(ae.id_estudiante) AS cantidad_alumnos,
-				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio_notas
+				e.nombre || ' ' || e.apellidos AS estudiante,
+				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio,
+				COUNT(DISTINCT s.id) AS cantidad_cursos,
+				MIN(a.fechaEntrega) AS desde,
+				MAX(a.fechaEntrega) AS hasta
 			FROM 
-				actividades_estudiantes ae
+				estudiantes e
+			JOIN actividades_estudiantes ae ON e.id = ae.id_estudiante
 			JOIN actividades a ON ae.id_actividad = a.id
 			JOIN secciones s ON a.id_seccion = s.id
-			JOIN cursos c ON s.id_curso = c.id
-			GROUP BY c.nombre, s.seccion;
+			GROUP BY e.nombre, e.apellidos;
 		`
 		rows, err = db.DB.Query(query)
 	} else {
@@ -171,14 +173,15 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 	)
 	if newStruct.IsEmpty() {
 		query := `
-		SELECT 
-			e.nombre || ' ' || e.apellidos AS estudiante,
-			SUM(h.movimiento) AS total_horas,
-			COUNT(*) AS cantidad_movimientos
-		FROM 
-			horas_beca h
-		JOIN apoyo_financiero af ON h.id_apoyo = af.id
-		JOIN estudiantes e ON af.id_estudiante = e.id;
+			SELECT 
+				e.nombre || ' ' || e.apellidos AS estudiante,
+				SUM(h.movimiento) AS total_horas,
+				COUNT(*) AS cantidad_movimientos
+			FROM 
+				horas_beca h
+			JOIN apoyo_financiero af ON h.id_apoyo = af.id
+			JOIN estudiantes e ON af.id_estudiante = e.id
+			GROUP BY e.nombre, e.apellidos;
 	`
 		rows, err = db.DB.Query(query)
 	} else {
@@ -241,20 +244,21 @@ func LatestActivities(w http.ResponseWriter, r *http.Request) {
 	)
 	if newStruct.IsEmpty() {
 		query := `
-		SELECT 
-			e.nombre || ' ' || e.apellidos AS estudiante,
-			a.nombre AS actividad,
-			a.descripcion,
-			a.valorNeto,
-			a.fechaEntrega,
-			s.seccion,
-			c.nombre AS curso
-		FROM 
-			actividades_estudiantes ae
-		JOIN actividades a ON ae.id_actividad = a.id
-		JOIN secciones s ON a.id_seccion = s.id
-		JOIN cursos c ON s.id_curso = c.id
-		JOIN estudiantes e ON ae.id_estudiante = e.id;
+			SELECT 
+				e.nombre || ' ' || e.apellidos AS estudiante,
+				a.nombre AS actividad,
+				a.descripcion,
+				a.valorNeto,
+				a.fechaEntrega,
+				s.seccion,
+				c.nombre AS curso
+			FROM 
+				actividades_estudiantes ae
+			JOIN actividades a ON ae.id_actividad = a.id
+			JOIN secciones s ON a.id_seccion = s.id
+			JOIN cursos c ON s.id_curso = c.id
+			JOIN estudiantes e ON ae.id_estudiante = e.id
+			ORDER BY a.fechaEntrega DESC;
 	`
 		rows, err = db.DB.Query(query)
 	} else {
@@ -334,7 +338,9 @@ func AvgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
 			JOIN profesores p ON s.id_profesor = p.id
 			JOIN cursos c ON s.id_curso = c.id
 			JOIN actividades a ON a.id_seccion = s.id
-			JOIN actividades_estudiantes ae ON ae.id_actividad = a.id;
+			JOIN actividades_estudiantes ae ON ae.id_actividad = a.id
+			GROUP BY p.nombres, p.apellidos, c.nombre, s.seccion
+			ORDER BY p.apellidos, c.nombre, s.seccion;
 	`
 		rows, err = db.DB.Query(query)
 	} else {
