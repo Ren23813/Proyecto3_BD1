@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"proyecto3/backend/db"
@@ -60,7 +61,7 @@ func AvgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 	// Devolver como JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resultados)
-	
+
 }
 
 func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
@@ -69,28 +70,47 @@ func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	var rows *sql.Rows
+	var err error
 
-	query := `
-		SELECT 
-			e.nombre || ' ' || e.apellidos AS estudiante,
-			ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio,
-			COUNT(DISTINCT s.id) AS cantidad_cursos,
-			MIN(a.fechaEntrega) AS desde,
-			MAX(a.fechaEntrega) AS hasta
-		FROM 
-			estudiantes e
-		JOIN actividades_estudiantes ae ON e.id = ae.id_estudiante
-		JOIN actividades a ON ae.id_actividad = a.id
-		JOIN secciones s ON a.id_seccion = s.id
-		WHERE 
-			e.id = $1
-			AND a.fechaEntrega BETWEEN $2 AND $3
-			AND ae.entregado = true
-			AND s.id_curso = $4
-		GROUP BY e.nombre, e.apellidos;
-	`
+	if newStruct.IsEmpty() {
+		query := `
+			SELECT 
+				c.nombre AS curso,
+				s.seccion,
+				COUNT(ae.id_estudiante) AS cantidad_alumnos,
+				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio_notas
+			FROM 
+				actividades_estudiantes ae
+			JOIN actividades a ON ae.id_actividad = a.id
+			JOIN secciones s ON a.id_seccion = s.id
+			JOIN cursos c ON s.id_curso = c.id
+			GROUP BY c.nombre, s.seccion;
+		`
+		rows, err = db.DB.Query(query)
+	} else {
+		query := `
+			SELECT 
+				e.nombre || ' ' || e.apellidos AS estudiante,
+				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio,
+				COUNT(DISTINCT s.id) AS cantidad_cursos,
+				MIN(a.fechaEntrega) AS desde,
+				MAX(a.fechaEntrega) AS hasta
+			FROM 
+				estudiantes e
+			JOIN actividades_estudiantes ae ON e.id = ae.id_estudiante
+			JOIN actividades a ON ae.id_actividad = a.id
+			JOIN secciones s ON a.id_seccion = s.id
+			WHERE 
+				e.id = $1
+				AND a.fechaEntrega BETWEEN $2 AND $3
+				AND ae.entregado = true
+				AND s.id_curso = $4
+			GROUP BY e.nombre, e.apellidos;
+		`
 
-	rows, err := db.DB.Query(query, newStruct.EstudianteID, newStruct.FechaInicio, newStruct.FechaFin, newStruct.CursoID)
+		rows, err := db.DB.Query(query, newStruct.EstudianteID, newStruct.FechaInicio, newStruct.FechaFin, newStruct.CursoID)
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

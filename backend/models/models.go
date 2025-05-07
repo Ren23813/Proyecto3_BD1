@@ -7,11 +7,25 @@ type Struct1 struct {
 	FechaFin    string `json:"fecha_fin"`
 }
 
+func (s Struct1) IsEmpty() bool {
+	return s.Seccion == 0 &&
+		s.CursoID == 0 &&
+		s.FechaInicio == "" &&
+		s.FechaFin == ""
+}
+
 type Struct2 struct {
 	EstudianteID int    `json:"estudiante_id"`
 	CursoID      int    `json:"curso_id"`
 	FechaInicio  string `json:"fecha_inicio"`
 	FechaFin     string `json:"fecha_fin"`
+}
+
+func (s Struct2) IsEmpty() bool {
+	return s.EstudianteID == 0 &&
+		s.CursoID == 0 &&
+		s.FechaInicio == "" &&
+		s.FechaFin == ""
 }
 
 type Struct3 struct {
@@ -21,6 +35,13 @@ type Struct3 struct {
 	MinPorcentaje string `json:"min_porcentaje"`
 }
 
+func (s Struct3) IsEmpty() bool {
+	return s.CicloInicio == "" &&
+		s.CicloFin == "" &&
+		s.MinHoras == 0 &&
+		s.MinPorcentaje == ""
+}
+
 type Struct4 struct {
 	EstudianteID int    `json:"estudiante_id"`
 	SeccionID    int    `json:"seccion_id"`
@@ -28,11 +49,25 @@ type Struct4 struct {
 	Limite       int    `json:"limite"`
 }
 
+func (s Struct4) IsEmpty() bool {
+	return s.EstudianteID == 0 &&
+		s.SeccionID == 0 &&
+		s.FechaLimite == "" &&
+		s.Limite == 0
+}
+
 type Struct5 struct {
 	ProfesorID  int    `json:"profesor_id"`
 	CursoID     int    `json:"curso_id"`
 	FechaInicio string `json:"fecha_inicio"`
 	FechaFin    string `json:"fecha_fin"`
+}
+
+func (s Struct5) IsEmpty() bool {
+	return s.ProfesorID == 0 &&
+		s.CursoID == 0 &&
+		s.FechaInicio == "" &&
+		s.FechaFin == ""
 }
 
 type ResultadoAvgNotasSeccion struct {
