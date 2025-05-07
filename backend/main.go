@@ -34,11 +34,11 @@ func main() {
 	})
 
 	router.Route("/db", func(r chi.Router) {
-		r.Post("/avgNotasS", handlers.AvgNotasSeccion)
-		r.Post("/avgEstudiantesC", handlers.AvgEstudianteCurso)
-		r.Post("/repHorasB", handlers.RepHorasbeca)
-		r.Post("/latestAct", handlers.LatestActivities)
-		r.Post("/avgSeccionP", handlers.AvgSeccionProfesor)
+		r.Post("/avgNotasS", handlers.AvgNotasSeccion)          //Promedio de notas por seccion
+		r.Post("/avgEstudiantesC", handlers.AvgEstudianteCurso) //promedio de notas de estudiantes en curso
+		r.Post("/repHorasB", handlers.RepHorasbeca)             //reporte de horas beca
+		r.Post("/latestAct", handlers.LatestActivities)         //promedio de las ultimas actividades existentes
+		r.Post("/avgSeccionP", handlers.AvgSeccionProfesor)     // promedio de secciones por profesor
 	})
 
 	fmt.Println("Server running on http://localhost:8080")
