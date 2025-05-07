@@ -10,8 +10,8 @@ type Struct1 struct {
 func (s Struct1) IsEmpty() bool {
 	return s.Seccion == 0 &&
 		s.CursoID == 0 &&
-		s.FechaInicio == "" &&
-		s.FechaFin == ""
+		s.FechaInicio == "2023-01-01" &&
+		s.FechaFin == "2026-01-01"
 }
 
 type Struct2 struct {
@@ -24,8 +24,8 @@ type Struct2 struct {
 func (s Struct2) IsEmpty() bool {
 	return s.EstudianteID == 0 &&
 		s.CursoID == 0 &&
-		s.FechaInicio == "" &&
-		s.FechaFin == ""
+		s.FechaInicio == "2023-01-01" &&
+		s.FechaFin == "2026-01-01"
 }
 
 type Struct3 struct {
@@ -52,7 +52,7 @@ type Struct4 struct {
 func (s Struct4) IsEmpty() bool {
 	return s.EstudianteID == 0 &&
 		s.SeccionID == 0 &&
-		s.FechaLimite == "" &&
+		s.FechaLimite == "2026-01-01" &&
 		s.Limite == 0
 }
 
@@ -66,8 +66,8 @@ type Struct5 struct {
 func (s Struct5) IsEmpty() bool {
 	return s.ProfesorID == 0 &&
 		s.CursoID == 0 &&
-		s.FechaInicio == "" &&
-		s.FechaFin == ""
+		s.FechaInicio == "2023-01-01" &&
+		s.FechaFin == "2026-01-01"
 }
 
 type ResultadoAvgNotasSeccion struct {
