@@ -8,6 +8,7 @@ import ReportTable from './ReportTable'
 import './ReportTable.css'
 import './App.css'
 
+import {usePDF} from 'react-to-pdf'
 
 function App() {
   const [title, setTitle] = useState("Select a Report");
@@ -22,6 +23,7 @@ function App() {
   const [cc, setCc] = useState (0);
   const [selectedInicio, setSelectedInicio] = useState(new Date());
   const [selectedFin, setSelectedFin] = useState(new Date());
+  const { toPDF, targetRef } = usePDF({ filename: 'pagina.pdf' });
 
 
   //HandlerReportes: función para llamar lod datos
@@ -264,11 +266,12 @@ function App() {
                     <div className='results'>
                         <div className='topbar'>
                         <button className='button2' onClick={"a"}>Generar Gráficas</button>
-                        <button className='button2' onClick={"a"}>Exportar como PDF</button>
+                        <button className='button2'  onClick={() => {setTimeout(() => {toPDF();}, 100); }}>Exportar como PDF</button> 
                         <button className='button2' onClick={"a"}>Exportar como CSV </button>
-
+                      </div>
+                        <div ref={targetRef}   style={{backgroundColor: 'white',padding: '20px',color: 'black',}}>
+                            <ReportTable data={resultados} />                          
                         </div>
-                        <ReportTable data={resultados} />
                     </div>
 
                 </div>
