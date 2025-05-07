@@ -24,6 +24,7 @@ function App() {
   const [selectedInicio, setSelectedInicio] = useState(new Date());
   const [selectedFin, setSelectedFin] = useState(new Date());
   const { toPDF, targetRef } = usePDF({ filename: 'pagina.pdf' });
+  const [modoPDF, setModoPDF] = useState(false);
 
 
   //función para la exportación de datos json a csv
@@ -288,11 +289,16 @@ function App() {
                     <div className='results'>
                         <div className='topbar'>
                         <button className='button2' onClick={"a"}>Generar Gráficas</button>
-                        <button className='button2'  onClick={() => {setTimeout(() => {toPDF();}, 100); }}>Exportar como PDF</button> 
+                        <button className='button2' 
+                          onClick={() => {setModoPDF(true) 
+                            setTimeout(() => {
+                            toPDF(); 
+                            setModoPDF(false); }, 200); }}
+                        >Exportar como PDF</button>                        
                         <button className='button2' onClick={()=>exportToCSV(resultados)}>Exportar como CSV </button>
                       </div>
-                        <div ref={targetRef}   style={{backgroundColor: 'white',padding: '20px',color: 'black',}}>
-                            <ReportTable data={resultados} />                          
+                        <div ref={targetRef}   style={{backgroundColor: 'white',padding: '20px',color: 'black'}}>
+                            <ReportTable data={modoPDF ? resultados.slice(0, 125) : resultados} />                          
                         </div>
                     </div>
 
