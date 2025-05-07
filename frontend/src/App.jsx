@@ -82,31 +82,31 @@ function App() {
             <div className='sidebar'>
                 <button className='button' onClick={() => {
                   setOpcion("reporte1")
-                  handleReporte("Reporte 1", "avgNotasS", { seccion: 11, curso_id: 2, fecha_inicio: "2020-01-01", fecha_fin: "2025-02-02" })}}>
+                  handleReporte("Reporte 1", "avgNotasS", { seccion: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01" })}}>
                   Reporte 1
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte2")
-                  handleReporte("Reporte 2", "avgEstudiantesC", {estudiante_id: 1, curso_id: 1, fecha_inicio: "2020-01-01", fecha_fin: "2025-02-02"})}}>
+                  handleReporte("Reporte 2", "avgEstudiantesC", {estudiante_id: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01"})}}>
                   Reporte 2
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte3")
-                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "2024-A", ciclo_fin: "2024-A", min_horas: 2,min_porcentaje: "50"})}}>
+                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "", ciclo_fin: "", min_horas: 0,min_porcentaje: ""})}}>
                   Reporte 3
                 </button>
                 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte4")
-                  handleReporte("Reporte 4", "latestAct", {estudiante_id: 2,seccion_id: 2,fecha_limite: "2025-02-02",limite: 2 })}}>
+                  handleReporte("Reporte 4", "latestAct", {estudiante_id: 0,seccion_id: 0,fecha_limite: "2026-01-01",limite: 0 })}}>
                   Reporte 4
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte5")
-                  handleReporte("Reporte 5", "avgSeccionP", {profesor_id: 2,curso_id: 2,fecha_inicio: "2025-02-02",fecha_fin: "2025-02-02"})}}>
+                  handleReporte("Reporte 5", "avgSeccionP", {profesor_id: 0,curso_id: 0,fecha_inicio: "2023-01-01",fecha_fin: "2026-01-01"})}}>
                   Reporte 5
                 </button>
 
