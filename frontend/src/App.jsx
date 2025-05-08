@@ -24,6 +24,7 @@ function App() {
   const [selectedInicio, setSelectedInicio] = useState(new Date());
   const [selectedFin, setSelectedFin] = useState(new Date());
   const { toPDF, targetRef } = usePDF({ filename: 'pagina.pdf' });
+  const [modoPDF, setModoPDF] = useState(false);
 
 
   //función para la exportación de datos json a csv
@@ -82,31 +83,31 @@ function App() {
             <div className='sidebar'>
                 <button className='button' onClick={() => {
                   setOpcion("reporte1")
-                  handleReporte("Reporte 1", "avgNotasS", { seccion: 11, curso_id: 2, fecha_inicio: "2020-01-01", fecha_fin: "2025-02-02" })}}>
+                  handleReporte("Reporte 1", "avgNotasS", { seccion: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01" })}}>
                   Reporte 1
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte2")
-                  handleReporte("Reporte 2", "avgEstudiantesC", {estudiante_id: 1, curso_id: 1, fecha_inicio: "2020-01-01", fecha_fin: "2025-02-02"})}}>
+                  handleReporte("Reporte 2", "avgEstudiantesC", {estudiante_id: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01"})}}>
                   Reporte 2
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte3")
-                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "2024-A", ciclo_fin: "2024-A", min_horas: 2,min_porcentaje: "50"})}}>
+                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "", ciclo_fin: "", min_horas: 0,min_porcentaje: ""})}}>
                   Reporte 3
                 </button>
                 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte4")
-                  handleReporte("Reporte 4", "latestAct", {estudiante_id: 2,seccion_id: 2,fecha_limite: "2025-02-02",limite: 2 })}}>
+                  handleReporte("Reporte 4", "latestAct", {estudiante_id: 0,seccion_id: 0,fecha_limite: "2026-01-01",limite: 0 })}}>
                   Reporte 4
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte5")
-                  handleReporte("Reporte 5", "avgSeccionP", {profesor_id: 2,curso_id: 2,fecha_inicio: "2025-02-02",fecha_fin: "2025-02-02"})}}>
+                  handleReporte("Reporte 5", "avgSeccionP", {profesor_id: 0,curso_id: 0,fecha_inicio: "2023-01-01",fecha_fin: "2026-01-01"})}}>
                   Reporte 5
                 </button>
 
@@ -288,11 +289,16 @@ function App() {
                     <div className='results'>
                         <div className='topbar'>
                         <button className='button2' onClick={"a"}>Generar Gráficas</button>
-                        <button className='button2'  onClick={() => {setTimeout(() => {toPDF();}, 100); }}>Exportar como PDF</button> 
+                        <button className='button2' 
+                          onClick={() => {setModoPDF(true) 
+                            setTimeout(() => {
+                            toPDF(); 
+                            setModoPDF(false); }, 200); }}
+                        >Exportar como PDF</button>                        
                         <button className='button2' onClick={()=>exportToCSV(resultados)}>Exportar como CSV </button>
                       </div>
-                        <div ref={targetRef}   style={{backgroundColor: 'white',padding: '20px',color: 'black',}}>
-                            <ReportTable data={resultados} />                          
+                        <div ref={targetRef}   style={{backgroundColor: 'white',padding: '20px',color: 'black'}}>
+                            <ReportTable data={modoPDF ? resultados.slice(0, 125) : resultados} />                          
                         </div>
                     </div>
 
