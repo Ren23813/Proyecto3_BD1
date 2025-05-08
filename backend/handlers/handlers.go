@@ -3,9 +3,11 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"proyecto3/backend/db"
 	"proyecto3/backend/models"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -17,12 +19,7 @@ func AvgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	if newStruct.IsEmpty() {
-		query := `
+	query := `
 		SELECT 
 			c.nombre AS curso,
 			s.seccion,
@@ -33,30 +30,32 @@ func AvgNotasSeccion(w http.ResponseWriter, r *http.Request) {
 		JOIN actividades a ON ae.id_actividad = a.id
 		JOIN secciones s ON a.id_seccion = s.id
 		JOIN cursos c ON s.id_curso = c.id
-		GROUP BY c.nombre, s.seccion;
 		`
-		rows, err = db.DB.Query(query)
-	} else {
-		query := `
-		SELECT 
-			c.nombre AS curso,
-			s.seccion,
-			COUNT(ae.id_estudiante) AS cantidad_alumnos,
-			ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio_notas
-		FROM 
-			actividades_estudiantes ae
-		JOIN actividades a ON ae.id_actividad = a.id
-		JOIN secciones s ON a.id_seccion = s.id
-		JOIN cursos c ON s.id_curso = c.id
-		WHERE 
-			s.seccion = $1
-			AND c.id = $2
-			AND a.fechaEntrega BETWEEN $3 AND $4
-		GROUP BY c.nombre, s.seccion;
-		`
+	var filters []string
+	var args []interface{}
+	argIdx := 1
 
-		rows, err = db.DB.Query(query, newStruct.Seccion, newStruct.CursoID, newStruct.FechaInicio, newStruct.FechaFin)
+	if newStruct.Seccion > 0 {
+		filters = append(filters, "s.seccion = $"+fmt.Sprint(argIdx))
+		args = append(args, newStruct.Seccion)
+		argIdx++
 	}
+	if newStruct.CursoID > 0 {
+		filters = append(filters, "c.id = $"+fmt.Sprint(argIdx))
+		args = append(args, newStruct.CursoID)
+		argIdx++
+	}
+	if newStruct.FechaInicio != "2023-01-01" && newStruct.FechaFin != "2026-01-01" {
+		filters = append(filters, fmt.Sprintf("a.fechaEntrega BETWEEN $%d AND $%d", argIdx, argIdx+1))
+		args = append(args, newStruct.FechaInicio, newStruct.FechaFin)
+		argIdx += 2
+	}
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+	query += " GROUP BY c.nombre, s.seccion;"
+
+	rows, err := db.DB.Query(query, args...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
