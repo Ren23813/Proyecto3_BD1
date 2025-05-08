@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -90,12 +89,7 @@ func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	if newStruct.IsEmpty() {
-		query := `
+	query := `
 			SELECT 
 				e.nombre || ' ' || e.apellidos AS estudiante,
 				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio,
@@ -107,32 +101,32 @@ func AvgEstudianteCurso(w http.ResponseWriter, r *http.Request) {
 			JOIN actividades_estudiantes ae ON e.id = ae.id_estudiante
 			JOIN actividades a ON ae.id_actividad = a.id
 			JOIN secciones s ON a.id_seccion = s.id
-			GROUP BY e.nombre, e.apellidos;
 		`
-		rows, err = db.DB.Query(query)
-	} else {
-		query := `
-			SELECT 
-				e.nombre || ' ' || e.apellidos AS estudiante,
-				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio,
-				COUNT(DISTINCT s.id) AS cantidad_cursos,
-				MIN(a.fechaEntrega) AS desde,
-				MAX(a.fechaEntrega) AS hasta
-			FROM 
-				estudiantes e
-			JOIN actividades_estudiantes ae ON e.id = ae.id_estudiante
-			JOIN actividades a ON ae.id_actividad = a.id
-			JOIN secciones s ON a.id_seccion = s.id
-			WHERE 
-				e.id = $1
-				AND a.fechaEntrega BETWEEN $2 AND $3
-				AND ae.entregado = true
-				AND s.id_curso = $4
-			GROUP BY e.nombre, e.apellidos;
-		`
+	var filters []string
+	var args []interface{}
+	argIdx := 1
 
-		rows, err = db.DB.Query(query, newStruct.EstudianteID, newStruct.FechaInicio, newStruct.FechaFin, newStruct.CursoID)
+	if newStruct.FechaInicio != "2023-01-01" && newStruct.FechaFin != "2026-01-01" {
+		filters = append(filters, fmt.Sprintf("a.fechaEntrega BETWEEN $%d AND $%d", argIdx, argIdx+1))
+		args = append(args, newStruct.FechaInicio, newStruct.FechaFin)
+		argIdx += 2
 	}
+	if newStruct.CursoID > 0 {
+		filters = append(filters, "s.id_curso = $"+fmt.Sprint(argIdx))
+		args = append(args, newStruct.CursoID)
+		argIdx++
+	}
+	if newStruct.EstudianteID > 0 {
+		filters = append(filters, "e.id = $"+fmt.Sprint(argIdx))
+		args = append(args, newStruct.EstudianteID)
+		argIdx++
+	}
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+	query += " GROUP BY e.nombre, e.apellidos;"
+
+	rows, err := db.DB.Query(query, args...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -166,12 +160,7 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	if newStruct.IsEmpty() {
-		query := `
+	query := `
 			SELECT 
 				e.nombre || ' ' || e.apellidos AS estudiante,
 				SUM(h.movimiento) AS total_horas,
@@ -180,28 +169,32 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 				horas_beca h
 			JOIN apoyo_financiero af ON h.id_apoyo = af.id
 			JOIN estudiantes e ON af.id_estudiante = e.id
-			GROUP BY e.nombre, e.apellidos;
 	`
-		rows, err = db.DB.Query(query)
-	} else {
-		query := `
-			SELECT 
-				e.nombre || ' ' || e.apellidos AS estudiante,
-				SUM(h.movimiento) AS total_horas,
-				COUNT(*) AS cantidad_movimientos
-			FROM 
-				horas_beca h
-			JOIN apoyo_financiero af ON h.id_apoyo = af.id
-			JOIN estudiantes e ON af.id_estudiante = e.id
-			WHERE 
-				h.ciclo BETWEEN $1 AND $2
-				AND h.movimiento >= $3
-				AND af.porcentaje_beca >= $4
-			GROUP BY e.nombre, e.apellidos;
-		`
+	var filters []string
+	var args []interface{}
+	argIdx := 1
 
-		rows, err = db.DB.Query(query, newStruct.CicloInicio, newStruct.CicloFin, newStruct.MinHoras, newStruct.MinPorcentaje)
+	if newStruct.CicloInicio != "2023-01-01" && newStruct.CicloFin != "2026-01-01" {
+		filters = append(filters, fmt.Sprintf("h.ciclo BETWEEN $%d AND $%d", argIdx, argIdx+1))
+		args = append(args, newStruct.CicloInicio, newStruct.CicloFin)
+		argIdx += 2
 	}
+	if newStruct.MinHoras > 0 {
+		filters = append(filters, "h.movimiento >= $"+fmt.Sprint(argIdx))
+		args = append(args, newStruct.MinHoras)
+		argIdx++
+	}
+	if newStruct.MinPorcentaje != "" {
+		filters = append(filters, "af.porcentaje_beca = $"+fmt.Sprint(argIdx))
+		args = append(args, newStruct.MinPorcentaje)
+		argIdx++
+	}
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+	query += " GROUP BY e.nombre, e.apellidos;"
+
+	rows, err := db.DB.Query(query, args...)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -237,55 +230,53 @@ func LatestActivities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	if newStruct.IsEmpty() {
-		query := `
-			SELECT 
-				e.nombre || ' ' || e.apellidos AS estudiante,
-				a.nombre AS actividad,
-				a.descripcion,
-				a.valorNeto,
-				a.fechaEntrega,
-				s.seccion,
-				c.nombre AS curso
-			FROM 
-				actividades_estudiantes ae
-			JOIN actividades a ON ae.id_actividad = a.id
-			JOIN secciones s ON a.id_seccion = s.id
-			JOIN cursos c ON s.id_curso = c.id
-			JOIN estudiantes e ON ae.id_estudiante = e.id
-			ORDER BY a.fechaEntrega DESC;
+	baseQuery := `
+		SELECT 
+			e.nombre || ' ' || e.apellidos AS estudiante,
+			a.nombre AS actividad,
+			a.descripcion,
+			a.valorNeto,
+			a.fechaEntrega,
+			s.seccion,
+			c.nombre AS curso
+		FROM 
+			actividades_estudiantes ae
+		JOIN actividades a ON ae.id_actividad = a.id
+		JOIN secciones s ON a.id_seccion = s.id
+		JOIN cursos c ON s.id_curso = c.id
+		JOIN estudiantes e ON ae.id_estudiante = e.id
 	`
-		rows, err = db.DB.Query(query)
-	} else {
-		query := `
-			SELECT 
-				e.nombre || ' ' || e.apellidos AS estudiante,
-				a.nombre AS actividad,
-				a.descripcion,
-				a.valorNeto,
-				a.fechaEntrega,
-				s.seccion,
-				c.nombre AS curso
-			FROM 
-				actividades_estudiantes ae
-			JOIN actividades a ON ae.id_actividad = a.id
-			JOIN secciones s ON a.id_seccion = s.id
-			JOIN cursos c ON s.id_curso = c.id
-			JOIN estudiantes e ON ae.id_estudiante = e.id
-			WHERE 
-				($1::int IS NULL OR e.id = $1)
-				AND ($2::int IS NULL OR s.id = $2)
-				AND ($3::date IS NULL OR a.fechaEntrega <= $3)
-			ORDER BY a.fechaEntrega DESC
-			LIMIT $4;
-		`
+	whereClauses := []string{}
+	args := []interface{}{}
+	argIndex := 1
 
-		rows, err = db.DB.Query(query, newStruct.EstudianteID, newStruct.SeccionID, newStruct.FechaLimite, newStruct.Limite)
+	if newStruct.EstudianteID > 0 {
+		whereClauses = append(whereClauses, fmt.Sprintf("e.id = $%d", argIndex))
+		args = append(args, newStruct.EstudianteID)
+		argIndex++
 	}
+	if newStruct.SeccionID > 0 {
+		whereClauses = append(whereClauses, fmt.Sprintf("s.id = $%d", argIndex))
+		args = append(args, newStruct.SeccionID)
+		argIndex++
+	}
+	if newStruct.FechaLimite != "2026-01-01" {
+		whereClauses = append(whereClauses, fmt.Sprintf("a.fechaEntrega <= $%d", argIndex))
+		args = append(args, newStruct.FechaLimite)
+		argIndex++
+	}
+
+	if len(whereClauses) > 0 {
+		baseQuery += " WHERE " + strings.Join(whereClauses, " AND ")
+	}
+	baseQuery += " ORDER BY a.fechaEntrega DESC"
+
+	if newStruct.Limite > 0 {
+		baseQuery += fmt.Sprintf(" LIMIT $%d", argIndex)
+		args = append(args, newStruct.Limite)
+	}
+
+	rows, err := db.DB.Query(baseQuery, args...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -308,7 +299,6 @@ func LatestActivities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Devolver como JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resultados)
 }
@@ -320,52 +310,51 @@ func AvgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		rows *sql.Rows
-		err  error
-	)
-	if newStruct.IsEmpty() {
-		query := `
-			SELECT 
-				p.nombres || ' ' || p.apellidos AS profesor,
-				c.nombre AS curso,
-				s.seccion,
-				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio_seccion,
-				COUNT(DISTINCT ae.id_estudiante) AS cantidad_estudiantes
-			FROM 
-				secciones s
-			JOIN profesores p ON s.id_profesor = p.id
-			JOIN cursos c ON s.id_curso = c.id
-			JOIN actividades a ON a.id_seccion = s.id
-			JOIN actividades_estudiantes ae ON ae.id_actividad = a.id
-			GROUP BY p.nombres, p.apellidos, c.nombre, s.seccion
-			ORDER BY p.apellidos, c.nombre, s.seccion;
+	baseQuery := `
+		SELECT 
+			p.nombres || ' ' || p.apellidos AS profesor,
+			c.nombre AS curso,
+			s.seccion,
+			ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio_seccion,
+			COUNT(DISTINCT ae.id_estudiante) AS cantidad_estudiantes
+		FROM 
+			secciones s
+		JOIN profesores p ON s.id_profesor = p.id
+		JOIN cursos c ON s.id_curso = c.id
+		JOIN actividades a ON a.id_seccion = s.id
+		JOIN actividades_estudiantes ae ON ae.id_actividad = a.id
 	`
-		rows, err = db.DB.Query(query)
-	} else {
-		query := `
-			SELECT 
-				p.nombres || ' ' || p.apellidos AS profesor,
-				c.nombre AS curso,
-				s.seccion,
-				ROUND(AVG((ae.valorRelativo / 100.0) * a.valorNeto), 2) AS promedio_seccion,
-				COUNT(DISTINCT ae.id_estudiante) AS cantidad_estudiantes
-			FROM 
-				secciones s
-			JOIN profesores p ON s.id_profesor = p.id
-			JOIN cursos c ON s.id_curso = c.id
-			JOIN actividades a ON a.id_seccion = s.id
-			JOIN actividades_estudiantes ae ON ae.id_actividad = a.id
-			WHERE 
-				($1::int IS NULL OR p.id = $1)
-				AND ($2::int IS NULL OR c.id = $2)
-				AND a.fechaEntrega BETWEEN $3 AND $4
-			GROUP BY p.nombres, p.apellidos, c.nombre, s.seccion
-			ORDER BY p.apellidos, c.nombre, s.seccion;
-		`
 
-		rows, err = db.DB.Query(query, newStruct.ProfesorID, newStruct.CursoID, newStruct.FechaInicio, newStruct.FechaFin)
+	conditions := []string{}
+	args := []interface{}{}
+	argIdx := 1
+
+	if newStruct.ProfesorID > 0 {
+		conditions = append(conditions, fmt.Sprintf("p.id = $%d", argIdx))
+		args = append(args, newStruct.ProfesorID)
+		argIdx++
 	}
+	if newStruct.CursoID > 0 {
+		conditions = append(conditions, fmt.Sprintf("c.id = $%d", argIdx))
+		args = append(args, newStruct.CursoID)
+		argIdx++
+	}
+	if newStruct.FechaInicio != "2026-01-01" && newStruct.FechaFin != "2026-01-01" {
+		conditions = append(conditions, fmt.Sprintf("a.fechaEntrega BETWEEN $%d AND $%d", argIdx, argIdx+1))
+		args = append(args, newStruct.FechaInicio, newStruct.FechaFin)
+		argIdx += 2
+	}
+
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	baseQuery += `
+		GROUP BY p.nombres, p.apellidos, c.nombre, s.seccion
+		ORDER BY p.apellidos, c.nombre, s.seccion;
+	`
+
+	rows, err := db.DB.Query(baseQuery, args...)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -388,7 +377,6 @@ func AvgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Devolver como JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resultados)
 }
