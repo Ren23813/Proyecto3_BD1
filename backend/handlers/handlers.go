@@ -174,7 +174,7 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 	var args []interface{}
 	argIdx := 1
 
-	if newStruct.CicloInicio != "2023-01-01" && newStruct.CicloFin != "2026-01-01" {
+	if newStruct.CicloInicio != "" && newStruct.CicloFin != "" {
 		filters = append(filters, fmt.Sprintf("h.ciclo BETWEEN $%d AND $%d", argIdx, argIdx+1))
 		args = append(args, newStruct.CicloInicio, newStruct.CicloFin)
 		argIdx += 2
