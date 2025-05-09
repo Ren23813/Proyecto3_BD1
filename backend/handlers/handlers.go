@@ -184,8 +184,8 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 		args = append(args, newStruct.MinHoras)
 		argIdx++
 	}
-	if newStruct.MinPorcentaje != "" {
-		filters = append(filters, "af.porcentaje_beca = $"+fmt.Sprint(argIdx))
+	if newStruct.MinPorcentaje > 0 {
+		filters = append(filters, "af.porcentaje_beca >= $"+fmt.Sprint(argIdx))
 		args = append(args, newStruct.MinPorcentaje)
 		argIdx++
 	}
