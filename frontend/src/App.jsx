@@ -8,6 +8,7 @@ import ReportTable from './ReportTable'
 import './ReportTable.css'
 import './App.css'
 import GenerateGraphic from './GraphsGenerator'
+import ReactDOM from 'react-dom/client';
 
 import {usePDF} from 'react-to-pdf'
 
@@ -76,6 +77,28 @@ function App() {
   }, []);
 
 
+
+
+  //Función para creación de gráficas
+  const abrirGraficaEnNuevaPestania = (resultados) => {
+    const nuevaVentana = window.open(
+      '',
+      '_blank',
+      'width=800,height=600,scrollbars=yes'
+    );
+    if (!nuevaVentana) return;
+
+    nuevaVentana.document.body.innerHTML = '<div id="grafico-root"></div>';
+
+    const root = ReactDOM.createRoot(
+      nuevaVentana.document.getElementById('grafico-root')
+    );
+    root.render(
+      <GenerateGraphic data={resultados} />
+    );
+  };  
+
+  
   //función para la exportación de datos json a csv
   const exportToCSV = (data, filename = 'reporte.csv') => {
     if (!data || !data.length) return;
@@ -477,7 +500,7 @@ function App() {
 
                     <div className='results'>
                         <div className='topbar'>
-                        <button className='button2' onClick={()=>GenerateGraphic(resultados)}>Generar Gráficas</button>
+                        <button className='button2' onClick={()=>abrirGraficaEnNuevaPestania(resultados)}>Generar Gráficas</button>
                         <button className='button2' 
                           onClick={() => {setModoPDF(true) 
                             setTimeout(() => {
