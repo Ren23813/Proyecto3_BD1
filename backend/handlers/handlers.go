@@ -174,7 +174,7 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 	var args []interface{}
 	argIdx := 1
 
-	if newStruct.CicloInicio != "2023-01-01" && newStruct.CicloFin != "2026-01-01" {
+	if newStruct.CicloInicio != "" && newStruct.CicloFin != "" {
 		filters = append(filters, fmt.Sprintf("h.ciclo BETWEEN $%d AND $%d", argIdx, argIdx+1))
 		args = append(args, newStruct.CicloInicio, newStruct.CicloFin)
 		argIdx += 2
@@ -184,8 +184,8 @@ func RepHorasbeca(w http.ResponseWriter, r *http.Request) {
 		args = append(args, newStruct.MinHoras)
 		argIdx++
 	}
-	if newStruct.MinPorcentaje != "" {
-		filters = append(filters, "af.porcentaje_beca = $"+fmt.Sprint(argIdx))
+	if newStruct.MinPorcentaje > 0 {
+		filters = append(filters, "af.porcentaje_beca >= $"+fmt.Sprint(argIdx))
 		args = append(args, newStruct.MinPorcentaje)
 		argIdx++
 	}
@@ -380,3 +380,113 @@ func AvgSeccionProfesor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resultados)
 }
+
+//secciones
+func GetSecciones(w http.ResponseWriter, r *http.Request) {
+    rows, err := db.DB.Query("SELECT id, seccion FROM secciones")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    var secciones []map[string]interface{}
+    for rows.Next() {
+        var id int
+        var seccion string
+        if err := rows.Scan(&id, &seccion); err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        secciones = append(secciones, map[string]interface{}{
+            "id": id,
+            "seccion": seccion,
+        })
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(secciones)
+}
+
+//Cursos
+func GetCursos(w http.ResponseWriter, r *http.Request) {
+    rows, err := db.DB.Query("SELECT id, nombre FROM cursos")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    var cursos []map[string]interface{}
+    for rows.Next() {
+        var id int
+        var nombre string
+        if err := rows.Scan(&id, &nombre); err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        cursos = append(cursos, map[string]interface{}{
+            "id": id,
+            "nombre": nombre,
+        })
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(cursos)
+}
+
+//Estudiates
+func GetEstudiantes(w http.ResponseWriter, r *http.Request) {
+    rows, err := db.DB.Query("SELECT id, nombre FROM estudiantes")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    var estudiantes []map[string]interface{}
+    for rows.Next() {
+        var id int
+        var nombre string
+        if err := rows.Scan(&id, &nombre); err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        estudiantes = append(estudiantes, map[string]interface{}{
+            "id": id,
+            "nombre": nombre,
+        })
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(estudiantes)
+}
+
+//Profesores
+func GetProfesores(w http.ResponseWriter, r *http.Request) {
+    rows, err := db.DB.Query("SELECT id, nombres FROM profesores")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    var profesores []map[string]interface{}
+    for rows.Next() {
+        var id int
+        var nombres string
+        if err := rows.Scan(&id, &nombres); err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        profesores = append(profesores, map[string]interface{}{
+            "id": id,
+            "nombres": nombres,
+        })
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(profesores)
+}
+
+

@@ -32,14 +32,14 @@ type Struct3 struct {
 	CicloInicio   string `json:"ciclo_inicio"`
 	CicloFin      string `json:"ciclo_fin"`
 	MinHoras      int    `json:"min_horas"`
-	MinPorcentaje string `json:"min_porcentaje"`
+	MinPorcentaje int    `json:"min_porcentaje"`
 }
 
 func (s Struct3) IsEmpty() bool {
 	return s.CicloInicio == "" &&
 		s.CicloFin == "" &&
 		s.MinHoras == 0 &&
-		s.MinPorcentaje == ""
+		s.MinPorcentaje == 0
 }
 
 type Struct4 struct {
