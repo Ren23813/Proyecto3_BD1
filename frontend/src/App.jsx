@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import ReportTable from './ReportTable'
 import './ReportTable.css'
 import './App.css'
+import GenerateGraphic from './GraphsGenerator'
 
 import {usePDF} from 'react-to-pdf'
 
@@ -95,7 +96,7 @@ function App() {
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte3")
-                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "", ciclo_fin: "", min_horas: 0,min_porcentaje: ""})}}>
+                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "", ciclo_fin: "", min_horas: 0,min_porcentaje: 0})}}>
                   Reporte 3
                 </button>
                 
@@ -204,7 +205,7 @@ function App() {
                           <input className='inputs' type="text" value={aa} onChange={(e) => setAa(e.target.value)} />
 
                           <button className='button small' onClick={()=> {
-                            handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: bb, ciclo_fin: cc, min_horas: limite,min_porcentaje: aa})}}>
+                            handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: bb, ciclo_fin: cc, min_horas: limite,min_porcentaje: parseInt(aa)})}}>
                             Aplicar Filtros
                           </button>
                         
@@ -288,7 +289,7 @@ function App() {
 
                     <div className='results'>
                         <div className='topbar'>
-                        <button className='button2' onClick={"a"}>Generar Gráficas</button>
+                        <button className='button2' onClick={()=>GenerateGraphic(resultados)}>Generar Gráficas</button>
                         <button className='button2' 
                           onClick={() => {setModoPDF(true) 
                             setTimeout(() => {
