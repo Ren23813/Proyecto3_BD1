@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import ReportTable from './ReportTable'
 import './ReportTable.css'
 import './App.css'
+import GenerateGraphic from './GraphsGenerator'
 
 import {usePDF} from 'react-to-pdf'
 
@@ -288,7 +289,7 @@ function App() {
 
                     <div className='results'>
                         <div className='topbar'>
-                        <button className='button2' onClick={"a"}>Generar Gráficas</button>
+                        <button className='button2' onClick={()=>GenerateGraphic(resultados)}>Generar Gráficas</button>
                         <button className='button2' 
                           onClick={() => {setModoPDF(true) 
                             setTimeout(() => {
