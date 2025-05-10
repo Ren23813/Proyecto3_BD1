@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 
@@ -15,17 +15,65 @@ function App() {
   const [title, setTitle] = useState("Select a Report");
   const [resultados, setResultados] = useState([]);
   const [opcion, setOpcion] = useState("reporte1")
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [seccion, setSeccion] = useState(0);
+  const [estudiante, setEstudiante] = useState(0);
   const [cursoid, setCursoid] = useState(0);
   const [limite, setLimite] = useState (0);
   const [aa, setAa] = useState (0);
   const [bb, setBb] = useState (0);
   const [cc, setCc] = useState (0);
-  const [selectedInicio, setSelectedInicio] = useState(new Date());
-  const [selectedFin, setSelectedFin] = useState(new Date());
+  const [selectedInicio, setSelectedInicio] = useState(new Date('2023-01-01'));
+  const [selectedFin, setSelectedFin] = useState(new Date('2025-12-12'));
   const { toPDF, targetRef } = usePDF({ filename: 'pagina.pdf' });
   const [modoPDF, setModoPDF] = useState(false);
+  const [secciones, setSecciones] = useState([]);
+  const [cursos, setCursos] = useState([]);
+  const [estudiantes, setEstudiantes] = useState([]);
+  const [profesor, setProfesor] = useState(0);
+  const [profesores, setProfesores] = useState([]);
+  const ciclos = [
+  { valor: "2024-A", etiqueta: "2024-A" },
+  { valor: "2024-B", etiqueta: "2024-B" },
+  { valor: "2025-A", etiqueta: "2025-A" },
+  { valor: "2025-B", etiqueta: "2025-B" },
+  ];
+
+  const porcentaje = [
+  { valor: 0, etiqueta: "0%" },
+  { valor: 25, etiqueta: "25%" },
+  { valor: 50, etiqueta: "50%" },
+  { valor: 75, etiqueta: "75%" },
+  { valor: 100, etiqueta: "100%" },
+  ];
+
+
+  useEffect(() => {
+    fetch("http://localhost:8080/db/secciones")
+      .then((res) => res.json())
+      .then((data) => setSecciones(data))
+      .catch((err) => console.error("Error al cargar secciones:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/db/cursos")
+      .then((res) => res.json())
+      .then((data) => setCursos(data))
+      .catch((err) => console.error("Error al cargar cursos:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/db/estudiantes")
+      .then((res) => res.json())
+      .then((data) => setEstudiantes(data))
+      .catch((err) => console.error("Error al cargar cursos:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/db/profesores")
+      .then((res) => res.json())
+      .then((data) => setProfesores(data))
+      .catch((err) => console.error("Error al cargar cursos:", err));
+  }, []);
 
 
   //función para la exportación de datos json a csv
@@ -84,32 +132,32 @@ function App() {
             <div className='sidebar'>
                 <button className='button' onClick={() => {
                   setOpcion("reporte1")
-                  handleReporte("Reporte 1", "avgNotasS", { seccion: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01" })}}>
-                  Reporte 1
+                  handleReporte("Promedio de los cursos", "avgNotasS", { seccion: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01" })}}>
+                  Promedio de los cursos
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte2")
-                  handleReporte("Reporte 2", "avgEstudiantesC", {estudiante_id: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01"})}}>
-                  Reporte 2
+                  handleReporte("Promedio de los estudiantes", "avgEstudiantesC", {estudiante_id: 0, curso_id: 0, fecha_inicio: "2023-01-01", fecha_fin: "2026-01-01"})}}>
+                  Promedio de los estudiante
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte3")
-                  handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: "", ciclo_fin: "", min_horas: 0,min_porcentaje: 0})}}>
-                  Reporte 3
+                  handleReporte("Horas beca estudiantes", "repHorasB", {ciclo_inicio: "", ciclo_fin: "", min_horas: 0,min_porcentaje: 0})}}>
+                  Horas beca estudiantes
                 </button>
                 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte4")
-                  handleReporte("Reporte 4", "latestAct", {estudiante_id: 0,seccion_id: 0,fecha_limite: "2026-01-01",limite: 0 })}}>
-                  Reporte 4
+                  handleReporte("Actividades asignadas", "latestAct", {estudiante_id: 0,seccion_id: 0,fecha_limite: "2026-01-01",limite: 0 })}}>
+                  Actividades asignadas
                 </button>
 
                 <button className='button' onClick={()=> {
                   setOpcion("reporte5")
-                  handleReporte("Reporte 5", "avgSeccionP", {profesor_id: 0,curso_id: 0,fecha_inicio: "2023-01-01",fecha_fin: "2026-01-01"})}}>
-                  Reporte 5
+                  handleReporte("Secciones de profesores", "avgSeccionP", {profesor_id: 0,curso_id: 0,fecha_inicio: "2023-01-01",fecha_fin: "2026-01-01"})}}>
+                  Secciones de profesores
                 </button>
 
                 
@@ -122,10 +170,37 @@ function App() {
                     <div className= 'filters'>
                       {opcion === "reporte1" && 
                         (<div className='change'>
-                          <label className='opcionTitle'>Sección:</label>
-                          <input className='inputs' type="number" value={seccion} onChange={(e) => setSeccion(parseInt(e.target.value))} />
-                          <label className='opcionTitle'>Curso id: </label>
-                          <input className='inputs' type="number" value={cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))} />
+
+                          <label className='opcionTitle'>Filtrar por curso: </label>
+                          <select className='selects' value = {cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))}>
+                            <option value={0}>Todos los cursos</option>
+                          {cursos.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.nombre}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+
+
+                          <label className='opcionTitle'>Filtrar por sección:</label>
+                          <select id = "seccion" className='selects' value = {seccion} onChange={(e) => setSeccion(parseInt(e.target.value))}>
+                            <option value={0}>Todas las secciones</option>
+                          {secciones.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.id}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+
+                          
                           <label className='opcionTitle'>Fecha inicio: </label>
                           
                           <DatePicker
@@ -146,7 +221,7 @@ function App() {
                            
                           />
                           <button className='button small' onClick={()=> {
-                            handleReporte("Reporte 1", "avgNotasS", { seccion: seccion, curso_id: cursoid, fecha_inicio: selectedInicio, fecha_fin: selectedFin })}}>
+                            handleReporte("Promedio de los cursos", "avgNotasS", { seccion: seccion, curso_id: cursoid, fecha_inicio: selectedInicio, fecha_fin: selectedFin })}}>
                             Aplicar Filtros
                           </button>
                         
@@ -157,10 +232,39 @@ function App() {
                       
                       {opcion === "reporte2" && 
                         (<div className='change'>
-                          <label className='opcionTitle'>Estudiante id:</label>
-                          <input className='inputs' type="number" value={seccion} onChange={(e) => setSeccion(parseInt(e.target.value))} />
-                          <label className='opcionTitle'>Curso id: </label>
-                          <input className='inputs' type="number" value={cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))} />
+              
+                          
+                          
+                          <label className='opcionTitle'>Filtrar por curso: </label>
+                          <select className='selects' value = {cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))}>
+                            <option value={0}>Todos los cursos</option>
+                          {cursos.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.nombre}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+
+                          <label className='opcionTitle'>Filtrar por estudiante:</label>
+                          <select className='selects' value = {estudiante} onChange={(e) => setEstudiante(parseInt(e.target.value))}>
+                            <option value={0}>Todos los estudiantes</option>
+                          {estudiantes.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.nombre}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+
+
+                        
                           <label className='opcionTitle'>Fecha inicio: </label>
                           
                           <DatePicker
@@ -182,7 +286,7 @@ function App() {
                           />
 
                           <button className='button small' onClick={()=> {
-                            handleReporte("Reporte 2", "avgEstudiantesC", {estudiante_id: seccion, curso_id: cursoid, fecha_inicio: selectedInicio, fecha_fin: selectedFin})}}>
+                            handleReporte("Promedio de los estudiantes", "avgEstudiantesC", {estudiante_id: estudiante, curso_id: cursoid, fecha_inicio: selectedInicio, fecha_fin: selectedFin})}}>
                             Aplicar Filtros
                           </button>
                         
@@ -193,19 +297,58 @@ function App() {
 
                       {opcion === "reporte3" && 
                         (<div className='change'>
-                          <label className='opcionTitle'>Ciclo inicio:</label>
-                          <input className='inputs' type="text" value={bb} onChange={(e) => setBb(e.target.value)} />
+                          <label className='opcionTitle'>Ciclo de inicio: </label>
+                          <select
+                            className='selects'
+                            value={bb}
+                            onChange={(e) => setBb(e.target.value)}
+                          >
+                            <option value=""> </option>
+                            {ciclos.map((opt) => (
+                              <option key={opt.valor} value={opt.valor}>
+                                {opt.etiqueta}
+                              </option>
+                            ))}
+                          </select>
+
+                        
                           <label className='opcionTitle'>Ciclo fin: </label>
-                          <input className='inputs' type="text" value={cc} onChange={(e) => setCc(e.target.value)} />
+                          <select
+                            className='selects'
+                            value={cc}
+                            onChange={(e) => setCc(e.target.value)}
+                          >
+                            <option value=""> </option>
+                            {ciclos.map((opt) => (
+                              <option key={opt.valor} value={opt.valor}>
+                                {opt.etiqueta}
+                              </option>
+                            ))}
+                          </select>
+
                           
-                          <label className='opcionTitle'>Min horas: </label>
+                        
+                          
+                          <label className='opcionTitle'>Porcentaje de beca: </label>
+                   
+                          <select
+                            className='selects'
+                            value={aa}
+                            onChange={(e) => setAa(e.target.value)}
+                          >
+                            
+                            {porcentaje.map((opt) => (
+                              <option key={opt.valor} value={opt.valor}>
+                                {opt.etiqueta}
+                              </option>
+                            ))}
+                          </select>
+
+                          <label className='opcionTitle'>Horas pendientes: </label>
                           <input className='inputs' type="number" value={limite} onChange={(e) => setLimite(parseInt(e.target.value))} />
-                          
-                          <label className='opcionTitle'>Porcentaje: </label>
-                          <input className='inputs' type="text" value={aa} onChange={(e) => setAa(e.target.value)} />
 
                           <button className='button small' onClick={()=> {
-                            handleReporte("Reporte 3", "repHorasB", {ciclo_inicio: bb, ciclo_fin: cc, min_horas: limite,min_porcentaje: parseInt(aa) || 0})}}>
+                            handleReporte("Horas beca estudiantes", "repHorasB", {ciclo_inicio: bb, ciclo_fin: cc, min_horas: limite,min_porcentaje: parseInt(aa) || 0})}}>
                             Aplicar Filtros
                           </button>
                         
@@ -215,13 +358,34 @@ function App() {
 
                       {opcion === "reporte4" && 
                         (<div className='change'>
-                          <label className='opcionTitle'>Estudiante id:</label>
-                          <input className='inputs' type="number" value={seccion} onChange={(e) => setSeccion(parseInt(e.target.value))} />
-                          <label className='opcionTitle'>Seccion id: </label>
-                          <input className='inputs' type="number" value={cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))} />
-           
-                          
-          
+                  
+                          <label className='opcionTitle'>Filtrar por sección:</label>
+                          <select id = "seccion" className='selects' value = {seccion} onChange={(e) => setSeccion(parseInt(e.target.value))}>
+                            <option value={0}> Todas las secciones</option>
+                          {secciones.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.seccion}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+
+                          <label className='opcionTitle'>Filtrar por estudiante:</label>
+                          <select className='selects' value = {estudiante} onChange={(e) => setEstudiante(parseInt(e.target.value))}>
+                            <option value={0}>Todos los estudiantes</option>
+                          {estudiantes.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.nombre}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
 
                           <label className='opcionTitle'>Fecha limite: </label>
                           
@@ -232,13 +396,13 @@ function App() {
                             dateFormat="yyyy-MM-dd"
                            
                           />
-                          <label className='opcionTitle'>Limite: </label>
+                          <label className='opcionTitle'>Limite de datos para mostrar: </label>
                           <input className='inputs' type="number" value={limite} onChange={(e) => setLimite(parseInt(e.target.value))} />
                           
                           
 
                           <button className='button small' onClick={()=> {
-                            handleReporte("Reporte 4", "latestAct", {estudiante_id: seccion ,seccion_id: cursoid,fecha_limite: selectedFin,limite: limite })}}>
+                            handleReporte("Actividades asignadas", "latestAct", {estudiante_id: estudiante,seccion_id: seccion,fecha_limite: selectedFin,limite: limite })}}>
                             Aplicar Filtros
                           </button>
                         
@@ -252,10 +416,34 @@ function App() {
                       {/*opcion 5*/}
                       {opcion === "reporte5" && 
                         (<div className='change'>
-                          <label className='opcionTitle'>Profesor id:</label>
-                          <input className='inputs' type="number" value={seccion} onChange={(e) => setSeccion(parseInt(e.target.value))} />
-                          <label className='opcionTitle'>Curso id: </label>
-                          <input className='inputs' type="number" value={cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))} />
+                          <label className='opcionTitle'>Filtrar por profesor: </label>
+                          <select className='selects' value = {profesor} onChange={(e) => setProfesor(parseInt(e.target.value))}>
+                            <option value={0}>Todos los profesores</option>
+                          {profesores.map((s) => (
+                       
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.nombres}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+                          <label className='opcionTitle'>Filtrar por curso: </label>
+                          <select className='selects' value = {cursoid} onChange={(e) => setCursoid(parseInt(e.target.value))}>
+                            <option value={0}>Todos los cursos</option>
+                          {cursos.map((s) => (
+                            
+                            <option key={s.id} value={s.id}>
+                              {s.nombre}
+                              
+                              
+                            </option>
+                          ))}
+
+                          </select>
+                         
                           <label className='opcionTitle'>Fecha inicio: </label>
                           
                           <DatePicker
@@ -277,7 +465,7 @@ function App() {
                           />
 
                           <button className='button small' onClick={()=> {
-                            handleReporte("Reporte 5", "avgSeccionP", {profesor_id: seccion,curso_id: cursoid,fecha_inicio: selectedInicio,fecha_fin: selectedFin})}}>
+                            handleReporte("Secciones de profesores", "avgSeccionP", {profesor_id: profesor,curso_id: cursoid,fecha_inicio: selectedInicio,fecha_fin: selectedFin})}}>
                             Aplicar Filtros
                           </button>
                         
