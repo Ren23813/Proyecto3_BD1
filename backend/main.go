@@ -38,7 +38,11 @@ func main() {
 		r.Post("/avgEstudiantesC", handlers.AvgEstudianteCurso) //promedio de notas de estudiantes en curso
 		r.Post("/repHorasB", handlers.RepHorasbeca)             //reporte de horas beca
 		r.Post("/latestAct", handlers.LatestActivities)         //promedio de las ultimas actividades existentes
-		r.Post("/avgSeccionP", handlers.AvgSeccionProfesor)     // promedio de secciones por profesor
+		r.Post("/avgSeccionP", handlers.AvgSeccionProfesor)		// promedio de secciones por profesor
+		r.Get("/secciones", handlers.GetSecciones)   
+		r.Get("/cursos", handlers.GetCursos)   
+		r.Get("/estudiantes", handlers.GetEstudiantes)   
+		r.Get("/profesores", handlers.GetProfesores)     
 	})
 
 	fmt.Println("Server running on http://localhost:8080")

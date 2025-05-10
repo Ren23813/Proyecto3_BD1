@@ -144,6 +144,22 @@
   transition: border-color 0.3s ease;
 }
 
+.selects{
+  position: relative;
+  padding: 5px 15px;
+  border: 1px solid #567794;
+  border-radius: 8px;
+  font-size: 15px;
+  width: 100%;
+  max-width: 180px;
+  box-sizing: border-box;
+  background-color: #567794;
+  color: rgb(255, 255, 255);
+  display: block;
+  visibility: visible;
+  transition: border-color 0.3s ease;
+}
+
 
 .results{
   background-color: #245580;
